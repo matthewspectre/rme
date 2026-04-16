@@ -46,6 +46,7 @@ func (h *Handler) Create(c *gin.Context) {
 
 	data := &entity.Patient{
 		Name:           req.Name,
+		NoRekamMedis:   req.NoRekamMedis,
 		AdmissionDate:  admission,
 		NIK:            req.NIK,
 		Gender:         req.Gender,
@@ -108,6 +109,7 @@ func (h *Handler) GetAll(c *gin.Context) {
 		resp = append(resp, PatientResponse{
 			ID:             p.ID,
 			Name:           p.Name,
+			NoRekamMedis:   p.NoRekamMedis,
 			AdmissionDate:  p.AdmissionDate,
 			NIK:            p.NIK,
 			Gender:         p.Gender,

@@ -9,6 +9,7 @@ type Patient struct {
 	Name           string
 	AdmissionDate  time.Time
 	NIK            string
+	NoRekamMedis   string
 	Gender         string
 	BloodType      string
 	BirthPlaceDate string

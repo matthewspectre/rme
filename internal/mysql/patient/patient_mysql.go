@@ -4,7 +4,10 @@ package patient
 
 import (
 	"context"
+	"database/sql"
 	"errors"
+	"fmt"
+	"time"
 
 	entity "rme/internal/entity/patient"
 	model "rme/internal/model/patient"
@@ -29,6 +32,7 @@ func toModel(e *entity.Patient) *model.PatientModel {
 		ID:             e.ID,
 		Name:           e.Name,
 		AdmissionDate:  e.AdmissionDate,
+		NoRekamMedis:   e.NoRekamMedis,
 		NIK:            e.NIK,
 		Gender:         e.Gender,
 		BloodType:      e.BloodType,
@@ -49,6 +53,7 @@ func toEntity(m *model.PatientModel) *entity.Patient {
 		ID:             m.ID,
 		Name:           m.Name,
 		AdmissionDate:  m.AdmissionDate,
+		NoRekamMedis:   m.NoRekamMedis,
 		NIK:            m.NIK,
 		Gender:         m.Gender,
 		BloodType:      m.BloodType,
@@ -65,6 +70,47 @@ func toEntity(m *model.PatientModel) *entity.Patient {
 func (r *RepositoryMySQL) Create(data *entity.Patient) error {
 	mdl := toModel(data)
 	return r.db.Create(mdl).Error
+}
+
+// CreateWithGeneratedRM inserts patient and generates `no_rekam_medis` if empty.
+// Format: RM-<year>-<seq> where seq is zero-padded 3 digits and resets each year.
+func (r *RepositoryMySQL) CreateWithGeneratedRM(data *entity.Patient) error {
+	if data == nil {
+		return fmt.Errorf("data is nil")
+	}
+
+	tx := r.db.Begin()
+	if tx.Error != nil {
+		return tx.Error
+	}
+	defer func() {
+		if rec := recover(); rec != nil {
+			tx.Rollback()
+		}
+	}()
+
+	// Only generate if not provided
+	if data.NoRekamMedis == "" {
+		year := time.Now().Year()
+		var max sql.NullInt64
+		raw := "SELECT COALESCE(MAX(CAST(RIGHT(no_rekam_medis,3) AS UNSIGNED)),0) AS maxseq FROM patients WHERE no_rekam_medis LIKE CONCAT('RM-', ?, '-%') FOR UPDATE"
+		if err := tx.Raw(raw, year).Row().Scan(&max); err != nil {
+			tx.Rollback()
+			return err
+		}
+		next := int(max.Int64) + 1
+		data.NoRekamMedis = fmt.Sprintf("RM-%d-%03d", year, next)
+	}
+
+	mdl := toModel(data)
+	if err := tx.Create(mdl).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Commit().Error; err != nil {
+		return err
+	}
+	return nil
 }
 
 // Update memperbarui data pasien yang sudah ada berdasarkan primary key.

@@ -8,6 +8,7 @@ type PatientModel struct {
 	ID             int       `gorm:"primaryKey;autoIncrement;column:id"`
 	Name           string    `gorm:"column:name"`
 	AdmissionDate  time.Time `gorm:"column:admission_date"`
+	NoRekamMedis   string    `gorm:"column:no_rekam_medis"`
 	NIK            string    `gorm:"column:nik"`
 	Gender         string    `gorm:"column:gender"`
 	BloodType      string    `gorm:"column:blood_type"`

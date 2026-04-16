@@ -3,6 +3,8 @@ package patient
 // Use case (business logic) for patients.
 
 import (
+	"fmt"
+
 	entity "rme/internal/entity/patient"
 	repo "rme/internal/repository/patient"
 )
@@ -23,6 +25,13 @@ func NewUsecase(r repo.Repository) Usecase {
 }
 
 func (u *usecase) Create(data *entity.Patient) error {
+	if data == nil {
+		return fmt.Errorf("data is nil")
+	}
+	// If no rekam medis provided, use repository transactional generator
+	if data.NoRekamMedis == "" {
+		return u.repo.CreateWithGeneratedRM(data)
+	}
 	return u.repo.Create(data)
 }
 
@@ -42,7 +51,8 @@ func (u *usecase) CreateOrUpdateByNIK(data *entity.Patient) (bool, error) {
 		}
 		return true, nil
 	}
-	if err := u.repo.Create(data); err != nil {
+	// when creating new patient, use generator to ensure no_rekam_medis is set
+	if err := u.repo.CreateWithGeneratedRM(data); err != nil {
 		return false, err
 	}
 	return false, nil

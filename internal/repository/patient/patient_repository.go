@@ -10,4 +10,7 @@ type Repository interface {
 	GetByNIK(nik string) (*patient.Patient, error)
 	GetAll() ([]*patient.Patient, error)
 	GetAllByIDDataKlinik(idDataKlinik int) ([]*patient.Patient, error)
+	// CreateWithGeneratedRM inserts patient and generates `no_rekam_medis` as RM-<year>-<seq>
+	// when `data.NoRekamMedis` is empty. Operation is transactional and safe for concurrency.
+	CreateWithGeneratedRM(data *patient.Patient) error
 }
