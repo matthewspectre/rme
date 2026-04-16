@@ -102,3 +102,19 @@ func (r *RepositoryMySQL) GetAll() ([]*entity.Patient, error) {
 	}
 	return res, nil
 }
+
+// GetAllByIDDataKlinik mengambil data pasien berdasarkan id_data_klinik.
+func (r *RepositoryMySQL) GetAllByIDDataKlinik(idDataKlinik int) ([]*entity.Patient, error) {
+	ctx := context.Background()
+	var mdls []model.PatientModel
+	if err := r.db.WithContext(ctx).
+		Where("id_data_klinik = ?", idDataKlinik).
+		Find(&mdls).Error; err != nil {
+		return nil, err
+	}
+	res := make([]*entity.Patient, 0, len(mdls))
+	for i := range mdls {
+		res = append(res, toEntity(&mdls[i]))
+	}
+	return res, nil
+}

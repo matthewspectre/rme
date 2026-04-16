@@ -1,14 +1,23 @@
 package router
 
-// HTTP router setup for anamnesis and other modules.
-
 import (
 	hanamnesis "rme/internal/handler/anamnesis"
+	hantrian "rme/internal/handler/antrian"
 	hauth "rme/internal/handler/auth"
+	hdoctor "rme/internal/handler/doctor"
 	hpatient "rme/internal/handler/patient"
+	hpoli "rme/internal/handler/poli"
 
 	"github.com/gin-gonic/gin"
 )
+
+// RegisterAntrianRoutes mendaftarkan endpoint /antrian ke Gin router.
+func RegisterAntrianRoutes(r *gin.Engine, handler *hantrian.Handler) {
+	group := r.Group("/antrian")
+	group.POST("/", handler.Create)
+	group.GET("/", handler.GetAll)
+	group.PATCH("/:id", handler.Update)
+}
 
 // RegisterAnamnesisRoutes mendaftarkan endpoint /anamnesis ke Gin router.
 // Contoh pemakaian di main:
@@ -38,5 +47,24 @@ func RegisterPatientRoutes(r *gin.Engine, handler *hpatient.Handler) {
 	group := r.Group("/patients")
 
 	group.POST("/", handler.Create)
+	group.GET("/", handler.GetAll)
+}
+
+// RegisterDoctorRoutes mendaftarkan endpoint /dokter ke Gin router.
+func RegisterDoctorRoutes(r *gin.Engine, handler *hdoctor.Handler) {
+	group := r.Group("/dokter")
+
+	group.POST("/", handler.Create)
+	group.GET("/", handler.GetAll)
+
+	// Kompatibilitas endpoint lama
+	groupLegacy := r.Group("/doctors")
+	groupLegacy.POST("/", handler.Create)
+	groupLegacy.GET("/", handler.GetAll)
+}
+
+// RegisterPoliRoutes mendaftarkan endpoint /poli ke Gin router.
+func RegisterPoliRoutes(r *gin.Engine, handler *hpoli.Handler) {
+	group := r.Group("/poli")
 	group.GET("/", handler.GetAll)
 }

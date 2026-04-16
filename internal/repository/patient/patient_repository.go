@@ -9,4 +9,5 @@ type Repository interface {
 	Update(data *patient.Patient) error
 	GetByNIK(nik string) (*patient.Patient, error)
 	GetAll() ([]*patient.Patient, error)
+	GetAllByIDDataKlinik(idDataKlinik int) ([]*patient.Patient, error)
 }

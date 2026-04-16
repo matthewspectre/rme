@@ -11,15 +11,26 @@ import (
 	"gorm.io/gorm"
 
 	handlerAnamnesis "rme/internal/handler/anamnesis"
+	handlerAntrian "rme/internal/handler/antrian"
 	handlerAuth "rme/internal/handler/auth"
+	handlerDoctor "rme/internal/handler/doctor"
 	handlerPatient "rme/internal/handler/patient"
+	handlerPoli "rme/internal/handler/poli"
 	mysqlAnamnesis "rme/internal/mysql/anamnesis"
+	mysqlAntrian "rme/internal/mysql/antrian"
+	mysqlDoctor "rme/internal/mysql/doctor"
 	mysqlPatient "rme/internal/mysql/patient"
+	mysqlPoli "rme/internal/mysql/poli"
 	mysqlUser "rme/internal/mysql/user"
+	repoAntrianInterface "rme/internal/repository/antrian"
+	repoPoliInterface "rme/internal/repository/poli"
 	router "rme/internal/router"
 	usecaseAnamnesis "rme/internal/usecase/anamnesis"
+	usecaseAntrian "rme/internal/usecase/antrian"
 	usecaseAuth "rme/internal/usecase/auth"
+	usecaseDoctor "rme/internal/usecase/doctor"
 	usecasePatient "rme/internal/usecase/patient"
+	usecasePoli "rme/internal/usecase/poli"
 )
 
 func main() {
@@ -57,12 +68,32 @@ func main() {
 	ucPatient := usecasePatient.NewUsecase(repoPatient)
 	handlerPatientHTTP := handlerPatient.NewHandler(ucPatient)
 
+	// Wiring clean architecture untuk Doctor
+	repoDoctor := mysqlDoctor.NewRepository(db)
+	ucDoctor := usecaseDoctor.NewUsecase(repoDoctor)
+	handlerDoctorHTTP := handlerDoctor.NewHandler(ucDoctor)
+
+	// Wiring clean architecture untuk Poli
+	repoPoli := mysqlPoli.NewRepositoryMySQL(db)
+	var repoPoliIface repoPoliInterface.Repository = repoPoli
+	ucPoli := usecasePoli.NewUsecase(repoPoliIface)
+	handlerPoliHTTP := handlerPoli.NewHandler(ucPoli)
+
+	// Wiring clean architecture untuk Antrian
+	repoAntrian := mysqlAntrian.NewRepositoryMySQL(db)
+	var repoAntrianIface repoAntrianInterface.Repository = repoAntrian
+	ucAntrian := usecaseAntrian.NewUsecase(repoAntrianIface)
+	handlerAntrianHTTP := handlerAntrian.NewHandler(ucAntrian)
+
 	// Setup Gin router
 	r := gin.Default()
 	r.Use(cors.Default())
 	router.RegisterAnamnesisRoutes(r, handlerAnam)
 	router.RegisterAuthRoutes(r, handlerAuthHTTP)
 	router.RegisterPatientRoutes(r, handlerPatientHTTP)
+	router.RegisterDoctorRoutes(r, handlerDoctorHTTP)
+	router.RegisterPoliRoutes(r, handlerPoliHTTP)
+	router.RegisterAntrianRoutes(r, handlerAntrianHTTP)
 
 	// Jalankan HTTP server
 	if err := r.Run(":8080"); err != nil {

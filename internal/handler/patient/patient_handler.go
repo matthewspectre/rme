@@ -4,6 +4,7 @@ package patient
 
 import (
 	"net/http"
+	"strconv"
 	"time"
 
 	entity "rme/internal/entity/patient"
@@ -75,7 +76,28 @@ func (h *Handler) Create(c *gin.Context) {
 
 // GetAll menangani GET /patients
 func (h *Handler) GetAll(c *gin.Context) {
-	list, err := h.uc.GetAll()
+	// Dukung query param camelCase dan snake_case.
+	idDataKlinikStr := c.Query("idDataKlinik")
+	if idDataKlinikStr == "" {
+		idDataKlinikStr = c.Query("id_data_klinik")
+	}
+
+	var (
+		list []*entity.Patient
+		err  error
+	)
+
+	if idDataKlinikStr != "" {
+		idDataKlinik, convErr := strconv.Atoi(idDataKlinikStr)
+		if convErr != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid idDataKlinik"})
+			return
+		}
+		list, err = h.uc.GetAllByIDDataKlinik(idDataKlinik)
+	} else {
+		list, err = h.uc.GetAll()
+	}
+
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
