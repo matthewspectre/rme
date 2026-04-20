@@ -15,13 +15,17 @@ import (
 	handlerAuth "rme/internal/handler/auth"
 	handlerDoctor "rme/internal/handler/doctor"
 	handlerPatient "rme/internal/handler/patient"
+	handlerPemeriksaanVital "rme/internal/handler/pemeriksaan_vital"
 	handlerPoli "rme/internal/handler/poli"
+
 	mysqlAnamnesis "rme/internal/mysql/anamnesis"
 	mysqlAntrian "rme/internal/mysql/antrian"
 	mysqlDoctor "rme/internal/mysql/doctor"
 	mysqlPatient "rme/internal/mysql/patient"
+	mysqlPemeriksaanVital "rme/internal/mysql/pemeriksaan_vital"
 	mysqlPoli "rme/internal/mysql/poli"
 	mysqlUser "rme/internal/mysql/user"
+
 	repoAntrianInterface "rme/internal/repository/antrian"
 	repoPoliInterface "rme/internal/repository/poli"
 	router "rme/internal/router"
@@ -30,6 +34,7 @@ import (
 	usecaseAuth "rme/internal/usecase/auth"
 	usecaseDoctor "rme/internal/usecase/doctor"
 	usecasePatient "rme/internal/usecase/patient"
+	usecasePemeriksaanVital "rme/internal/usecase/pemeriksaan_vital"
 	usecasePoli "rme/internal/usecase/poli"
 )
 
@@ -85,6 +90,11 @@ func main() {
 	ucAntrian := usecaseAntrian.NewUsecase(repoAntrianIface)
 	handlerAntrianHTTP := handlerAntrian.NewHandler(ucAntrian)
 
+	// Wiring pemeriksaan_vital
+	repoPemeriksaanVital := mysqlPemeriksaanVital.NewRepository(db)
+	ucPemeriksaanVital := usecasePemeriksaanVital.NewUsecase(repoPemeriksaanVital)
+	handlerPemeriksaanVitalHTTP := handlerPemeriksaanVital.NewHandler(ucPemeriksaanVital)
+
 	// Setup Gin router
 	r := gin.Default()
 	r.Use(cors.Default())
@@ -94,6 +104,7 @@ func main() {
 	router.RegisterDoctorRoutes(r, handlerDoctorHTTP)
 	router.RegisterPoliRoutes(r, handlerPoliHTTP)
 	router.RegisterAntrianRoutes(r, handlerAntrianHTTP)
+	router.RegisterPemeriksaanVitalRoutes(r, handlerPemeriksaanVitalHTTP)
 
 	// Jalankan HTTP server
 	if err := r.Run(":8080"); err != nil {

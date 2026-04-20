@@ -6,6 +6,7 @@ import (
 	hauth "rme/internal/handler/auth"
 	hdoctor "rme/internal/handler/doctor"
 	hpatient "rme/internal/handler/patient"
+	hpv "rme/internal/handler/pemeriksaan_vital"
 	hpoli "rme/internal/handler/poli"
 
 	"github.com/gin-gonic/gin"
@@ -72,4 +73,16 @@ func RegisterDoctorRoutes(r *gin.Engine, handler *hdoctor.Handler) {
 func RegisterPoliRoutes(r *gin.Engine, handler *hpoli.Handler) {
 	group := r.Group("/poli")
 	group.GET("/", handler.GetAll)
+}
+
+// RegisterPemeriksaanVitalRoutes mendaftarkan endpoint /pemeriksaan_vital
+func RegisterPemeriksaanVitalRoutes(r *gin.Engine, handler *hpv.Handler) {
+	group := r.Group("/pemeriksaan_vital")
+	group.POST("/", handler.Create)
+	group.GET("/", handler.GetAll)
+	group.GET("/:id", handler.GetByID)
+	// Generic update (partial)
+	group.PATCH("/:id", handler.Update)
+	// Soft-hide endpoint
+	group.PATCH("/:id/hide", handler.Hide)
 }
