@@ -9,6 +9,7 @@ type Usecase interface {
 	Create(data *entity.Doctor) error
 	GetAll() ([]*entity.Doctor, error)
 	GetAllByIDDataKlinik(idDataKlinik int) ([]*entity.Doctor, error)
+	GetAllByPoli(idPoli int) ([]*entity.Doctor, error)
 }
 
 type usecase struct {
@@ -29,4 +30,8 @@ func (u *usecase) GetAll() ([]*entity.Doctor, error) {
 
 func (u *usecase) GetAllByIDDataKlinik(idDataKlinik int) ([]*entity.Doctor, error) {
 	return u.repo.GetAllByIDDataKlinik(idDataKlinik)
+}
+
+func (u *usecase) GetAllByPoli(idPoli int) ([]*entity.Doctor, error) {
+	return u.repo.GetAllByPoli(idPoli)
 }

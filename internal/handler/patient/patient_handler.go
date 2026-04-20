@@ -82,13 +82,25 @@ func (h *Handler) GetAll(c *gin.Context) {
 	if idDataKlinikStr == "" {
 		idDataKlinikStr = c.Query("id_data_klinik")
 	}
+	// idPasien filter (ambil dari kolom `id`)
+	idPasienStr := c.Query("idPasien")
+	if idPasienStr == "" {
+		idPasienStr = c.Query("id_pasien")
+	}
 
 	var (
 		list []*entity.Patient
 		err  error
 	)
 
-	if idDataKlinikStr != "" {
+	if idPasienStr != "" {
+		idPasien, convErr := strconv.Atoi(idPasienStr)
+		if convErr != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid idPasien"})
+			return
+		}
+		list, err = h.uc.GetAllByID(idPasien)
+	} else if idDataKlinikStr != "" {
 		idDataKlinik, convErr := strconv.Atoi(idDataKlinikStr)
 		if convErr != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid idDataKlinik"})

@@ -46,13 +46,24 @@ func (h *Handler) GetAll(c *gin.Context) {
 	if idDataKlinikStr == "" {
 		idDataKlinikStr = c.Query("id_data_klinik")
 	}
+	idPoliStr := c.Query("idPoli")
+	if idPoliStr == "" {
+		idPoliStr = c.Query("id_poli")
+	}
 
 	var (
 		list []*entity.Doctor
 		err  error
 	)
 
-	if idDataKlinikStr != "" {
+	if idPoliStr != "" {
+		idPoli, convErr := strconv.Atoi(idPoliStr)
+		if convErr != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid idPoli"})
+			return
+		}
+		list, err = h.uc.GetAllByPoli(idPoli)
+	} else if idDataKlinikStr != "" {
 		idDataKlinik, convErr := strconv.Atoi(idDataKlinikStr)
 		if convErr != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid idDataKlinik"})

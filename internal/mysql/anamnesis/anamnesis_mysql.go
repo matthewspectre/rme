@@ -82,24 +82,24 @@ func (r *RepositoryMySQL) Create(data *entity.Anamnesis) error {
 	return r.db.Create(mdl).Error
 }
 
-// GetByID mengambil satu data anamnesis berdasarkan ID pasien.
-func (r *RepositoryMySQL) GetByID(idPasien int) (*entity.Anamnesis, error) {
+// GetByID mengambil satu data anamnesis berdasarkan ID pasien dan idPoli.
+func (r *RepositoryMySQL) GetByID(idPasien int, idPoli int) (*entity.Anamnesis, error) {
 	ctx := context.Background()
 	var mdl model.AnamnesisModel
 	if err := r.db.WithContext(ctx).
-		Where("id_pasien = ? AND visible = ?", idPasien, 1).
+		Where("id_pasien = ? AND id_data_klinik = ? AND visible = ?", idPasien, idPoli, 1).
 		First(&mdl).Error; err != nil {
 		return nil, err
 	}
 	return toEntity(&mdl), nil
 }
 
-// GetAll mengambil semua data anamnesis yang masih visible.
-func (r *RepositoryMySQL) GetAll() ([]*entity.Anamnesis, error) {
+// GetAll mengambil semua data anamnesis yang masih visible dan sesuai poli.
+func (r *RepositoryMySQL) GetAll(idPoli int) ([]*entity.Anamnesis, error) {
 	ctx := context.Background()
 	var mdls []model.AnamnesisModel
 	if err := r.db.WithContext(ctx).
-		Where("visible = ?", 1).
+		Where("id_data_klinik = ? AND visible = ?", idPoli, 1).
 		Find(&mdls).Error; err != nil {
 		return nil, err
 	}

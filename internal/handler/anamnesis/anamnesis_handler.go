@@ -91,8 +91,9 @@ func (h *Handler) Create(c *gin.Context) {
 // GetByID menangani GET /anamnesis/:id_pasien (Gin handler)
 func (h *Handler) GetByID(c *gin.Context) {
 	idStr := c.Param("id_pasien")
-	if idStr == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "id_pasien is required"})
+	idPoliStr := c.Query("idPoli")
+	if idStr == "" || idPoliStr == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "id_pasien and idPoli are required"})
 		return
 	}
 
@@ -101,8 +102,13 @@ func (h *Handler) GetByID(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id_pasien"})
 		return
 	}
+	idPoli, err := strconv.Atoi(idPoliStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid idPoli"})
+		return
+	}
 
-	data, err := h.uc.GetByID(id)
+	data, err := h.uc.GetByID(id, idPoli)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -140,7 +146,18 @@ func (h *Handler) GetByID(c *gin.Context) {
 
 // GetAll menangani GET /anamnesis (Gin handler)
 func (h *Handler) GetAll(c *gin.Context) {
-	list, err := h.uc.GetAll()
+	idPoliStr := c.Query("idPoli")
+	if idPoliStr == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "idPoli is required"})
+		return
+	}
+	idPoli, err := strconv.Atoi(idPoliStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid idPoli"})
+		return
+	}
+
+	list, err := h.uc.GetAll(idPoli)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

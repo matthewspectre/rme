@@ -4,6 +4,7 @@ package doctor
 
 import (
 	"context"
+	"strconv"
 
 	entity "rme/internal/entity/doctor"
 	model "rme/internal/model/doctor"
@@ -71,6 +72,23 @@ func (r *RepositoryMySQL) GetAllByIDDataKlinik(idDataKlinik int) ([]*entity.Doct
 	var mdls []model.DoctorModel
 	if err := r.db.WithContext(ctx).
 		Where("id_data_klinik = ?", idDataKlinik).
+		Find(&mdls).Error; err != nil {
+		return nil, err
+	}
+	res := make([]*entity.Doctor, 0, len(mdls))
+	for i := range mdls {
+		res = append(res, toEntity(&mdls[i]))
+	}
+	return res, nil
+}
+
+// GetAllByPoli mengambil semua dokter sesuai dengan nilai poli (kolom `poli`).
+func (r *RepositoryMySQL) GetAllByPoli(idPoli int) ([]*entity.Doctor, error) {
+	ctx := context.Background()
+	var mdls []model.DoctorModel
+	poliStr := strconv.Itoa(idPoli)
+	if err := r.db.WithContext(ctx).
+		Where("poli = ?", poliStr).
 		Find(&mdls).Error; err != nil {
 		return nil, err
 	}

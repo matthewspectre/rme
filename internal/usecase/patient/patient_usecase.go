@@ -14,6 +14,10 @@ type Usecase interface {
 	CreateOrUpdateByNIK(data *entity.Patient) (bool, error)
 	GetAll() ([]*entity.Patient, error)
 	GetAllByIDDataKlinik(idDataKlinik int) ([]*entity.Patient, error)
+	// GetByID mengambil pasien berdasarkan id (primary key)
+	GetByID(idPasien int) (*entity.Patient, error)
+	// GetAllByID mengambil daftar pasien yang cocok dengan id (biasanya 0/1 result)
+	GetAllByID(idPasien int) ([]*entity.Patient, error)
 }
 
 type usecase struct {
@@ -64,4 +68,12 @@ func (u *usecase) GetAll() ([]*entity.Patient, error) {
 
 func (u *usecase) GetAllByIDDataKlinik(idDataKlinik int) ([]*entity.Patient, error) {
 	return u.repo.GetAllByIDDataKlinik(idDataKlinik)
+}
+
+func (u *usecase) GetByID(idPasien int) (*entity.Patient, error) {
+	return u.repo.GetByID(idPasien)
+}
+
+func (u *usecase) GetAllByID(idPasien int) ([]*entity.Patient, error) {
+	return u.repo.GetAllByID(idPasien)
 }

@@ -11,8 +11,8 @@ import (
 // Di atas repository (DB), di bawah handler (HTTP/API).
 type Usecase interface {
 	Create(data *entity.Anamnesis) error
-	GetByID(idPasien int) (*entity.Anamnesis, error)
-	GetAll() ([]*entity.Anamnesis, error)
+	GetByID(idPasien int, idPoli int) (*entity.Anamnesis, error)
+	GetAll(idPoli int) ([]*entity.Anamnesis, error)
 }
 
 // usecase adalah implementasi konkret dari Usecase.
@@ -32,11 +32,11 @@ func (u *usecase) Create(data *entity.Anamnesis) error {
 }
 
 // GetByID mengambil satu data Anamnesis berdasarkan ID pasien.
-func (u *usecase) GetByID(idPasien int) (*entity.Anamnesis, error) {
-	return u.repo.GetByID(idPasien)
+func (u *usecase) GetByID(idPasien int, idPoli int) (*entity.Anamnesis, error) {
+	return u.repo.GetByID(idPasien, idPoli)
 }
 
-// GetAll mengambil semua data Anamnesis yang masih visible.
-func (u *usecase) GetAll() ([]*entity.Anamnesis, error) {
-	return u.repo.GetAll()
+// GetAll mengambil semua data Anamnesis yang masih visible dan sesuai poli.
+func (u *usecase) GetAll(idPoli int) ([]*entity.Anamnesis, error) {
+	return u.repo.GetAll(idPoli)
 }

@@ -164,3 +164,34 @@ func (r *RepositoryMySQL) GetAllByIDDataKlinik(idDataKlinik int) ([]*entity.Pati
 	}
 	return res, nil
 }
+
+// GetByID mengambil satu pasien berdasarkan primary key `id`.
+func (r *RepositoryMySQL) GetByID(idPasien int) (*entity.Patient, error) {
+	ctx := context.Background()
+	var mdl model.PatientModel
+	if err := r.db.WithContext(ctx).
+		Where("id = ?", idPasien).
+		First(&mdl).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return toEntity(&mdl), nil
+}
+
+// GetAllByID mengambil daftar pasien yang cocok dengan nilai id (biasanya mengembalikan 0/1 hasil).
+func (r *RepositoryMySQL) GetAllByID(idPasien int) ([]*entity.Patient, error) {
+	ctx := context.Background()
+	var mdls []model.PatientModel
+	if err := r.db.WithContext(ctx).
+		Where("id = ?", idPasien).
+		Find(&mdls).Error; err != nil {
+		return nil, err
+	}
+	res := make([]*entity.Patient, 0, len(mdls))
+	for i := range mdls {
+		res = append(res, toEntity(&mdls[i]))
+	}
+	return res, nil
+}
