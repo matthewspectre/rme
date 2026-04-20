@@ -25,26 +25,20 @@ func toModel(e *entity.Anamnesis) *model.AnamnesisModel {
 		return nil
 	}
 	return &model.AnamnesisModel{
-		IDPasien:                e.IDPasien,
-		IDDokter:                e.IDDokter,
-		Text:                    e.Text,
-		DateMake:                e.DateMake,
-		DateUpdate:              e.DateUpdate,
-		IDDataKlinik:            e.IDDataKlinik,
-		RiwayatPengobatan:       e.RiwayatPengobatan,
-		RiwayatKeluarga:         e.RiwayatKeluarga,
-		RiwayatPekerjaan:        e.RiwayatPekerjaan,
-		RiwayatAutoanamnesis:    e.RiwayatAutoanamnesis,
-		RiwayatPenyakitDahulu:   e.RiwayatPenyakitDahulu,
-		RiwayatPenyakitSekarang: e.RiwayatPenyakitSekarang,
-		RiwayatPenyakitLain:     e.RiwayatPenyakitLain,
-		HubunganPasien:          e.HubunganPasien,
-		RiwayatAnestesiBedah:    e.RiwayatAnestesiBedah,
-		RiwayatKeluhanUtama:     e.RiwayatKeluhanUtama,
-		StatusKehamilan:         e.StatusKehamilan,
-		KeluhanTambahan:         e.KeluhanTambahan,
-		Catatan:                 e.Catatan,
-		Visible:                 e.Visible,
+		ID:                    e.ID,
+		IDPasien:              e.IDPasien,
+		IDDokter:              e.IDDokter,
+		Text:                  e.Text,
+		DateMake:              e.DateMake,
+		DateUpdate:            e.DateUpdate,
+		IDDataKlinik:          e.IDDataKlinik,
+		RiwayatPengobatan:     e.RiwayatPengobatan,
+		RiwayatKeluarga:       e.RiwayatKeluarga,
+		RiwayatPenyakitDahulu: e.RiwayatPenyakitDahulu,
+		RiwayatPenyakitLain:   e.RiwayatPenyakitLain,
+		StatusKehamilan:       e.StatusKehamilan,
+		KeluhanTambahan:       e.KeluhanTambahan,
+		Visible:               e.Visible,
 	}
 }
 
@@ -53,26 +47,20 @@ func toEntity(m *model.AnamnesisModel) *entity.Anamnesis {
 		return nil
 	}
 	return &entity.Anamnesis{
-		IDPasien:                m.IDPasien,
-		IDDokter:                m.IDDokter,
-		Text:                    m.Text,
-		DateMake:                m.DateMake,
-		DateUpdate:              m.DateUpdate,
-		IDDataKlinik:            m.IDDataKlinik,
-		RiwayatPengobatan:       m.RiwayatPengobatan,
-		RiwayatKeluarga:         m.RiwayatKeluarga,
-		RiwayatPekerjaan:        m.RiwayatPekerjaan,
-		RiwayatAutoanamnesis:    m.RiwayatAutoanamnesis,
-		RiwayatPenyakitDahulu:   m.RiwayatPenyakitDahulu,
-		RiwayatPenyakitSekarang: m.RiwayatPenyakitSekarang,
-		RiwayatPenyakitLain:     m.RiwayatPenyakitLain,
-		HubunganPasien:          m.HubunganPasien,
-		RiwayatAnestesiBedah:    m.RiwayatAnestesiBedah,
-		RiwayatKeluhanUtama:     m.RiwayatKeluhanUtama,
-		StatusKehamilan:         m.StatusKehamilan,
-		KeluhanTambahan:         m.KeluhanTambahan,
-		Catatan:                 m.Catatan,
-		Visible:                 m.Visible,
+		ID:                    m.ID,
+		IDPasien:              m.IDPasien,
+		IDDokter:              m.IDDokter,
+		Text:                  m.Text,
+		DateMake:              m.DateMake,
+		DateUpdate:            m.DateUpdate,
+		IDDataKlinik:          m.IDDataKlinik,
+		RiwayatPengobatan:     m.RiwayatPengobatan,
+		RiwayatKeluarga:       m.RiwayatKeluarga,
+		RiwayatPenyakitDahulu: m.RiwayatPenyakitDahulu,
+		RiwayatPenyakitLain:   m.RiwayatPenyakitLain,
+		StatusKehamilan:       m.StatusKehamilan,
+		KeluhanTambahan:       m.KeluhanTambahan,
+		Visible:               m.Visible,
 	}
 }
 
@@ -82,30 +70,64 @@ func (r *RepositoryMySQL) Create(data *entity.Anamnesis) error {
 	return r.db.Create(mdl).Error
 }
 
-// GetByID mengambil satu data anamnesis berdasarkan ID pasien dan idPoli.
-func (r *RepositoryMySQL) GetByID(idPasien int, idPoli int) (*entity.Anamnesis, error) {
+// GetByID mengambil satu data anamnesis (ambil baris pertama).
+// Parameter `idPasien` diterima tetapi tidak dipakai di query.
+func (r *RepositoryMySQL) GetByID(idPasien int) (*entity.Anamnesis, error) {
 	ctx := context.Background()
-	var mdl model.AnamnesisModel
+	type modelWithName struct {
+		model.AnamnesisModel
+		NamaPasien string `gorm:"column:nama_pasien"`
+	}
+	var aw modelWithName
 	if err := r.db.WithContext(ctx).
-		Where("id_pasien = ? AND id_data_klinik = ? AND visible = ?", idPasien, idPoli, 1).
-		First(&mdl).Error; err != nil {
+		Table("anamnesis a").
+		Select("a.*, p.name AS nama_pasien").
+		Joins("LEFT JOIN patients p ON p.id = a.id_pasien").
+		First(&aw).Error; err != nil {
 		return nil, err
 	}
-	return toEntity(&mdl), nil
+	ent := toEntity(&aw.AnamnesisModel)
+	ent.NamaPasien = aw.NamaPasien
+	return ent, nil
 }
 
-// GetAll mengambil semua data anamnesis yang masih visible dan sesuai poli.
-func (r *RepositoryMySQL) GetAll(idPoli int) ([]*entity.Anamnesis, error) {
+// GetAll mengambil semua data anamnesis yang masih visible.
+// Jika `idDokter` atau `idPasien` tidak nil, hasil akan difilter berdasarkan kolom terkait.
+func (r *RepositoryMySQL) GetAll(idDokter *int, idPasien *int) ([]*entity.Anamnesis, error) {
 	ctx := context.Background()
-	var mdls []model.AnamnesisModel
-	if err := r.db.WithContext(ctx).
-		Where("id_data_klinik = ? AND visible = ?", idPoli, 1).
-		Find(&mdls).Error; err != nil {
+	type modelWithName struct {
+		model.AnamnesisModel
+		NamaPasien string `gorm:"column:nama_pasien"`
+	}
+	var awls []modelWithName
+	q := r.db.WithContext(ctx).Table("anamnesis a").Select("a.*, p.name AS nama_pasien").Joins("LEFT JOIN patients p ON p.id = a.id_pasien").Where("a.visible = ?", 1)
+	if idDokter != nil {
+		q = q.Where("a.id_dokter = ?", *idDokter)
+	}
+	if idPasien != nil {
+		q = q.Where("a.id_pasien = ?", *idPasien)
+	}
+	if err := q.Find(&awls).Error; err != nil {
 		return nil, err
 	}
-	res := make([]*entity.Anamnesis, 0, len(mdls))
-	for i := range mdls {
-		res = append(res, toEntity(&mdls[i]))
+	res := make([]*entity.Anamnesis, 0, len(awls))
+	for i := range awls {
+		ent := toEntity(&awls[i].AnamnesisModel)
+		ent.NamaPasien = awls[i].NamaPasien
+		res = append(res, ent)
 	}
 	return res, nil
+}
+
+// Update memperbarui kolom pada baris anamnesis yang ditentukan oleh id_anamnesis.
+func (r *RepositoryMySQL) Update(idAnamnesis int, updates map[string]interface{}) error {
+	ctx := context.Background()
+	if updates == nil || len(updates) == 0 {
+		return nil
+	}
+	// Pastikan kolom yang diupdate sesuai nama kolom di DB (snake_case)
+	return r.db.WithContext(ctx).
+		Model(&model.AnamnesisModel{}).
+		Where("id_anamnesis = ?", idAnamnesis).
+		Updates(updates).Error
 }
