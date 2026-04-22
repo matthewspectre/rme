@@ -17,6 +17,8 @@ import (
 	handlerPatient "rme/internal/handler/patient"
 	handlerPemeriksaanVital "rme/internal/handler/pemeriksaan_vital"
 	handlerPoli "rme/internal/handler/poli"
+	handlerRujukUlang "rme/internal/handler/rujuk_ulang"
+	handlerTatalaksana "rme/internal/handler/tatalaksana"
 
 	mysqlAnamnesis "rme/internal/mysql/anamnesis"
 	mysqlAntrian "rme/internal/mysql/antrian"
@@ -24,6 +26,8 @@ import (
 	mysqlPatient "rme/internal/mysql/patient"
 	mysqlPemeriksaanVital "rme/internal/mysql/pemeriksaan_vital"
 	mysqlPoli "rme/internal/mysql/poli"
+	mysqlRujukUlang "rme/internal/mysql/rujuk_ulang"
+	mysqlTatalaksana "rme/internal/mysql/tatalaksana"
 	mysqlUser "rme/internal/mysql/user"
 
 	repoAntrianInterface "rme/internal/repository/antrian"
@@ -36,6 +40,8 @@ import (
 	usecasePatient "rme/internal/usecase/patient"
 	usecasePemeriksaanVital "rme/internal/usecase/pemeriksaan_vital"
 	usecasePoli "rme/internal/usecase/poli"
+	usecaseRujukUlang "rme/internal/usecase/rujuk_ulang"
+	usecaseTatalaksana "rme/internal/usecase/tatalaksana"
 )
 
 func main() {
@@ -95,6 +101,16 @@ func main() {
 	ucPemeriksaanVital := usecasePemeriksaanVital.NewUsecase(repoPemeriksaanVital)
 	handlerPemeriksaanVitalHTTP := handlerPemeriksaanVital.NewHandler(ucPemeriksaanVital)
 
+	// Wiring tatalaksana
+	repoTatalaksana := mysqlTatalaksana.NewRepository(db)
+	ucTatalaksana := usecaseTatalaksana.NewUsecase(repoTatalaksana)
+	handlerTatalaksanaHTTP := handlerTatalaksana.NewHandler(ucTatalaksana)
+
+	// Wiring rujuk_ulang
+	repoRujukUlang := mysqlRujukUlang.NewRepository(db)
+	ucRujukUlang := usecaseRujukUlang.NewUsecase(repoRujukUlang)
+	handlerRujukUlangHTTP := handlerRujukUlang.NewHandler(ucRujukUlang)
+
 	// Setup Gin router
 	r := gin.Default()
 	r.Use(cors.Default())
@@ -105,6 +121,8 @@ func main() {
 	router.RegisterPoliRoutes(r, handlerPoliHTTP)
 	router.RegisterAntrianRoutes(r, handlerAntrianHTTP)
 	router.RegisterPemeriksaanVitalRoutes(r, handlerPemeriksaanVitalHTTP)
+	router.RegisterTatalaksanaRoutes(r, handlerTatalaksanaHTTP)
+	router.RegisterRujukUlangRoutes(r, handlerRujukUlangHTTP)
 
 	// Jalankan HTTP server
 	if err := r.Run(":8080"); err != nil {

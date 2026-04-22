@@ -8,9 +8,13 @@ import (
 	hpatient "rme/internal/handler/patient"
 	hpv "rme/internal/handler/pemeriksaan_vital"
 	hpoli "rme/internal/handler/poli"
+	hru "rme/internal/handler/rujuk_ulang"
+	hta "rme/internal/handler/tatalaksana"
 
 	"github.com/gin-gonic/gin"
 )
+
+// tatalaksana handler import
 
 // RegisterAntrianRoutes mendaftarkan endpoint /antrian ke Gin router.
 func RegisterAntrianRoutes(r *gin.Engine, handler *hantrian.Handler) {
@@ -84,5 +88,25 @@ func RegisterPemeriksaanVitalRoutes(r *gin.Engine, handler *hpv.Handler) {
 	// Generic update (partial)
 	group.PATCH("/:id", handler.Update)
 	// Soft-hide endpoint
+	group.PATCH("/:id/hide", handler.Hide)
+}
+
+// RegisterTatalaksanaRoutes mendaftarkan endpoint /tatalaksana
+func RegisterTatalaksanaRoutes(r *gin.Engine, handler *hta.Handler) {
+	group := r.Group("/tatalaksana")
+	group.POST("/", handler.Create)
+	group.GET("/", handler.GetAll)
+	group.GET("/:id", handler.GetByID)
+	group.PATCH("/:id", handler.Update)
+	group.PATCH("/:id/hide", handler.Hide)
+}
+
+// RegisterRujukUlangRoutes mendaftarkan endpoint /rujuk_ulang
+func RegisterRujukUlangRoutes(r *gin.Engine, handler *hru.Handler) {
+	group := r.Group("/rujuk_ulang")
+	group.POST("/", handler.Create)
+	group.GET("/", handler.GetAll)
+	group.GET("/:id", handler.GetByID)
+	group.PATCH("/:id", handler.Update)
 	group.PATCH("/:id/hide", handler.Hide)
 }

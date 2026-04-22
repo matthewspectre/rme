@@ -60,14 +60,17 @@ func (r *RepositoryMySQL) CreateWithNumber(a *entity.Antrian) (int, error) {
 	return next, nil
 }
 
-func (r *RepositoryMySQL) GetAll() ([]*repo.AntrianWithNamaPasien, error) {
+func (r *RepositoryMySQL) GetAll(idDokter *int) ([]*repo.AntrianWithNamaPasien, error) {
 	var rowsStruct []repo.AntrianWithNamaPasien
 	// Join ke tabel patients untuk ambil nama pasien
-	err := r.db.Table("antrian_pasien as a").
+	q := r.db.Table("antrian_pasien as a").
 		Select("a.id, a.id_pasien, p.name as nama_pasien, a.id_dokter as id_dokter, d.nama_dokter as nama_dokter, a.nomor_antrian, a.id_poli, a.waktu").
 		Joins("JOIN patients p ON a.id_pasien = p.id").
-		Joins("LEFT JOIN dokter d ON a.id_dokter = d.id").
-		Scan(&rowsStruct).Error
+		Joins("LEFT JOIN dokter d ON a.id_dokter = d.id")
+	if idDokter != nil {
+		q = q.Where("a.id_dokter = ?", *idDokter)
+	}
+	err := q.Scan(&rowsStruct).Error
 	if err != nil {
 		return nil, err
 	}

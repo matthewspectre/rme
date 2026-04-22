@@ -70,9 +70,8 @@ func (r *RepositoryMySQL) Create(data *entity.Anamnesis) error {
 	return r.db.Create(mdl).Error
 }
 
-// GetByID mengambil satu data anamnesis (ambil baris pertama).
-// Parameter `idPasien` diterima tetapi tidak dipakai di query.
-func (r *RepositoryMySQL) GetByID(idPasien int) (*entity.Anamnesis, error) {
+// GetByID mengambil satu data anamnesis berdasarkan `id_anamnesis` (ambil baris pertama).
+func (r *RepositoryMySQL) GetByID(idAnamnesis int) (*entity.Anamnesis, error) {
 	ctx := context.Background()
 	type modelWithName struct {
 		model.AnamnesisModel
@@ -83,6 +82,7 @@ func (r *RepositoryMySQL) GetByID(idPasien int) (*entity.Anamnesis, error) {
 		Table("anamnesis a").
 		Select("a.*, p.name AS nama_pasien").
 		Joins("LEFT JOIN patients p ON p.id = a.id_pasien").
+		Where("a.id_anamnesis = ?", idAnamnesis).
 		First(&aw).Error; err != nil {
 		return nil, err
 	}

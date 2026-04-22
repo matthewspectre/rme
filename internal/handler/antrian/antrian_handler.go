@@ -38,7 +38,16 @@ func (h *Handler) Create(c *gin.Context) {
 }
 
 func (h *Handler) GetAll(c *gin.Context) {
-	antrians, err := h.uc.GetAll()
+	idDokterStr := c.Query("idDokter")
+	var idDokterPtr *int
+	if idDokterStr != "" {
+		var v int
+		if _, err := fmt.Sscan(idDokterStr, &v); err == nil {
+			idDokterPtr = &v
+		}
+	}
+
+	antrians, err := h.uc.GetAll(idDokterPtr)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

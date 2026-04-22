@@ -18,7 +18,7 @@ type AntrianWithNamaPasien struct {
 type Repository interface {
 	// Create inserts antrian and returns the assigned nomorAntrian.
 	Create(a *antrian.Antrian) (int, error)
-	GetAll() ([]*AntrianWithNamaPasien, error)
+	GetAll(idDokter *int) ([]*AntrianWithNamaPasien, error)
 	// Update updates fields of antrian with given id and returns updated row (with joined names)
 	Update(id int, updates map[string]interface{}) (*AntrianWithNamaPasien, error)
 }
