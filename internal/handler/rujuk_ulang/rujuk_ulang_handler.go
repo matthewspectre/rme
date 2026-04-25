@@ -211,3 +211,18 @@ func (h *Handler) Hide(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "hidden"})
 }
+
+// Delete menangani DELETE /rujuk_ulang/:id
+func (h *Handler) Delete(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		return
+	}
+	if err := h.uc.Delete(id); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "deleted"})
+}

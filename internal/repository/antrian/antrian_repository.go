@@ -10,6 +10,7 @@ type AntrianWithNamaPasien struct {
 	NamaPasien   string
 	IDDokter     int
 	NamaDokter   string
+	Status       int
 	NomorAntrian int
 	IDPoli       int
 	Waktu        string
@@ -21,4 +22,8 @@ type Repository interface {
 	GetAll(idDokter *int) ([]*AntrianWithNamaPasien, error)
 	// Update updates fields of antrian with given id and returns updated row (with joined names)
 	Update(id int, updates map[string]interface{}) (*AntrianWithNamaPasien, error)
+	// UpdateByPatient updates rows matching id_pasien and returns updated rows
+	UpdateByPatient(idPasien int, updates map[string]interface{}) ([]*AntrianWithNamaPasien, error)
+	// DeleteByPatient deletes rows where id_pasien = ?
+	DeleteByPatient(idPasien int) error
 }

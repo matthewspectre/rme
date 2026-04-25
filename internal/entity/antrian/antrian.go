@@ -16,4 +16,5 @@ type Antrian struct {
 	NomorAntrian int
 	IDPoli       int
 	Waktu        string // atau time.Time jika ingin parsing otomatis
+	Status       int
 }

@@ -12,6 +12,7 @@ type AntrianResponse struct {
 	NamaPasien   string `json:"namaPasien"`
 	IDDokter     int    `json:"idDokter"`
 	NamaDokter   string `json:"namaDokter"`
+	Status       int    `json:"status"`
 	NomorAntrian int    `json:"nomorAntrian"`
 	IDPoli       int    `json:"idPoli"`
 	Waktu        string `json:"waktu"`
@@ -22,4 +23,5 @@ type AntrianUpdateRequest struct {
 	IDDokter     *int `json:"idDokter,omitempty"`
 	IDPoli       *int `json:"idPoli,omitempty"`
 	NomorAntrian *int `json:"nomorAntrian,omitempty"`
+	Status       *int `json:"status,omitempty"`
 }

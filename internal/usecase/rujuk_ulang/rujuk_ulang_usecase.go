@@ -10,6 +10,7 @@ type Usecase interface {
 	GetByID(id int) (*entity.RujukUlang, error)
 	GetAll(idPasien *int) ([]*entity.RujukUlang, error)
 	Update(id int, updates map[string]interface{}) error
+	Delete(id int) error
 }
 
 type usecase struct {
@@ -34,4 +35,8 @@ func (u *usecase) GetAll(idPasien *int) ([]*entity.RujukUlang, error) {
 
 func (u *usecase) Update(id int, updates map[string]interface{}) error {
 	return u.repo.Update(id, updates)
+}
+
+func (u *usecase) Delete(id int) error {
+	return u.repo.Delete(id)
 }

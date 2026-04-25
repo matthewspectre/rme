@@ -49,6 +49,7 @@ func (r *RepositoryMySQL) CreateWithNumber(a *entity.Antrian) (int, error) {
 		NomorAntrian: next,
 		IDPoli:       a.IDPoli,
 		Waktu:        time.Now().Format("2006-01-02 15:04:05"),
+		Status:       1,
 	}
 	if err := tx.Create(&m).Error; err != nil {
 		tx.Rollback()
@@ -64,7 +65,7 @@ func (r *RepositoryMySQL) GetAll(idDokter *int) ([]*repo.AntrianWithNamaPasien, 
 	var rowsStruct []repo.AntrianWithNamaPasien
 	// Join ke tabel patients untuk ambil nama pasien
 	q := r.db.Table("antrian_pasien as a").
-		Select("a.id, a.id_pasien, p.name as nama_pasien, a.id_dokter as id_dokter, d.nama_dokter as nama_dokter, a.nomor_antrian, a.id_poli, a.waktu").
+		Select("a.id, a.id_pasien, p.name as nama_pasien, a.id_dokter as id_dokter, d.nama_dokter as nama_dokter, a.nomor_antrian, a.id_poli, a.waktu, a.status as status").
 		Joins("JOIN patients p ON a.id_pasien = p.id").
 		Joins("LEFT JOIN dokter d ON a.id_dokter = d.id")
 	if idDokter != nil {
@@ -83,7 +84,6 @@ func (r *RepositoryMySQL) GetAll(idDokter *int) ([]*repo.AntrianWithNamaPasien, 
 }
 
 func (r *RepositoryMySQL) Update(id int, updates map[string]interface{}) (*repo.AntrianWithNamaPasien, error) {
-	// Map keys from DTO-style to DB columns if necessary
 	mapped := make(map[string]interface{})
 	for k, v := range updates {
 		switch k {
@@ -95,6 +95,8 @@ func (r *RepositoryMySQL) Update(id int, updates map[string]interface{}) (*repo.
 			mapped["id_poli"] = v
 		case "nomorAntrian":
 			mapped["nomor_antrian"] = v
+		case "status":
+			mapped["status"] = v
 		default:
 			mapped[k] = v
 		}
@@ -107,7 +109,7 @@ func (r *RepositoryMySQL) Update(id int, updates map[string]interface{}) (*repo.
 	// Fetch updated row with joins (patients, dokter)
 	var row repo.AntrianWithNamaPasien
 	err := r.db.Table("antrian_pasien as a").
-		Select("a.id, a.id_pasien, p.name as nama_pasien, a.id_dokter as id_dokter, d.nama_dokter as nama_dokter, a.nomor_antrian, a.id_poli, a.waktu").
+		Select("a.id, a.id_pasien, p.name as nama_pasien, a.id_dokter as id_dokter, d.nama_dokter as nama_dokter, a.nomor_antrian, a.id_poli, a.waktu, a.status as status").
 		Joins("JOIN patients p ON a.id_pasien = p.id").
 		Joins("LEFT JOIN dokter d ON a.id_dokter = d.id").
 		Where("a.id = ?", id).
@@ -116,4 +118,51 @@ func (r *RepositoryMySQL) Update(id int, updates map[string]interface{}) (*repo.
 		return nil, err
 	}
 	return &row, nil
+}
+
+// UpdateByPatient updates rows where id_pasien = ? and returns updated rows
+func (r *RepositoryMySQL) UpdateByPatient(idPasien int, updates map[string]interface{}) ([]*repo.AntrianWithNamaPasien, error) {
+	// Map keys from DTO-style to DB columns if necessary
+	mapped := make(map[string]interface{})
+	for k, v := range updates {
+		switch k {
+		case "idPasien":
+			mapped["id_pasien"] = v
+		case "idDokter":
+			mapped["id_dokter"] = v
+		case "idPoli":
+			mapped["id_poli"] = v
+		case "nomorAntrian":
+			mapped["nomor_antrian"] = v
+		case "status":
+			mapped["status"] = v
+		default:
+			mapped[k] = v
+		}
+	}
+
+	if err := r.db.Model(&model.AntrianModel{}).Where("id_pasien = ?", idPasien).Updates(mapped).Error; err != nil {
+		return nil, err
+	}
+
+	var rows []repo.AntrianWithNamaPasien
+	q := r.db.Table("antrian_pasien as a").
+		Select("a.id, a.id_pasien, p.name as nama_pasien, a.id_dokter as id_dokter, d.nama_dokter as nama_dokter, a.nomor_antrian, a.id_poli, a.waktu, a.status as status").
+		Joins("JOIN patients p ON a.id_pasien = p.id").
+		Joins("LEFT JOIN dokter d ON a.id_dokter = d.id").
+		Where("a.id_pasien = ?", idPasien)
+
+	if err := q.Scan(&rows).Error; err != nil {
+		return nil, err
+	}
+	res := make([]*repo.AntrianWithNamaPasien, 0, len(rows))
+	for i := range rows {
+		res = append(res, &rows[i])
+	}
+	return res, nil
+}
+
+func (r *RepositoryMySQL) DeleteByPatient(idPasien int) error {
+	// Use Exec raw delete to avoid potential GORM layer issues returning EOF
+	return r.db.Exec("DELETE FROM antrian_pasien WHERE id_pasien = ?", idPasien).Error
 }

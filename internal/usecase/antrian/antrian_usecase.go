@@ -9,6 +9,8 @@ type Usecase interface {
 	Create(a *antrian.Antrian) (int, error)
 	GetAll(idDokter *int) ([]*repository.AntrianWithNamaPasien, error)
 	Update(id int, updates map[string]interface{}) (*repository.AntrianWithNamaPasien, error)
+	UpdateByPatient(idPasien int, updates map[string]interface{}) ([]*repository.AntrianWithNamaPasien, error)
+	DeleteByPatient(idPasien int) error
 }
 
 type usecase struct {
@@ -29,4 +31,12 @@ func (u *usecase) GetAll(idDokter *int) ([]*repository.AntrianWithNamaPasien, er
 
 func (u *usecase) Update(id int, updates map[string]interface{}) (*repository.AntrianWithNamaPasien, error) {
 	return u.repo.Update(id, updates)
+}
+
+func (u *usecase) UpdateByPatient(idPasien int, updates map[string]interface{}) ([]*repository.AntrianWithNamaPasien, error) {
+	return u.repo.UpdateByPatient(idPasien, updates)
+}
+
+func (u *usecase) DeleteByPatient(idPasien int) error {
+	return u.repo.DeleteByPatient(idPasien)
 }

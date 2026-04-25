@@ -14,7 +14,10 @@ import (
 	handlerAntrian "rme/internal/handler/antrian"
 	handlerAuth "rme/internal/handler/auth"
 	handlerDoctor "rme/internal/handler/doctor"
+	handlerICD "rme/internal/handler/icd"
 	handlerPatient "rme/internal/handler/patient"
+	handlerPemeriksaanEkg "rme/internal/handler/pemeriksaan_ekg"
+	handlerPemeriksaanLaboratorium "rme/internal/handler/pemeriksaan_laboratorium"
 	handlerPemeriksaanVital "rme/internal/handler/pemeriksaan_vital"
 	handlerPoli "rme/internal/handler/poli"
 	handlerRujukUlang "rme/internal/handler/rujuk_ulang"
@@ -23,7 +26,10 @@ import (
 	mysqlAnamnesis "rme/internal/mysql/anamnesis"
 	mysqlAntrian "rme/internal/mysql/antrian"
 	mysqlDoctor "rme/internal/mysql/doctor"
+	mysqlICD "rme/internal/mysql/icd"
 	mysqlPatient "rme/internal/mysql/patient"
+	mysqlPemeriksaanEkg "rme/internal/mysql/pemeriksaan_ekg"
+	mysqlPemeriksaanLaboratorium "rme/internal/mysql/pemeriksaan_laboratorium"
 	mysqlPemeriksaanVital "rme/internal/mysql/pemeriksaan_vital"
 	mysqlPoli "rme/internal/mysql/poli"
 	mysqlRujukUlang "rme/internal/mysql/rujuk_ulang"
@@ -37,7 +43,10 @@ import (
 	usecaseAntrian "rme/internal/usecase/antrian"
 	usecaseAuth "rme/internal/usecase/auth"
 	usecaseDoctor "rme/internal/usecase/doctor"
+	usecaseICD "rme/internal/usecase/icd"
 	usecasePatient "rme/internal/usecase/patient"
+	usecasePemeriksaanEkg "rme/internal/usecase/pemeriksaan_ekg"
+	usecasePemeriksaanLaboratorium "rme/internal/usecase/pemeriksaan_laboratorium"
 	usecasePemeriksaanVital "rme/internal/usecase/pemeriksaan_vital"
 	usecasePoli "rme/internal/usecase/poli"
 	usecaseRujukUlang "rme/internal/usecase/rujuk_ulang"
@@ -101,17 +110,28 @@ func main() {
 	ucPemeriksaanVital := usecasePemeriksaanVital.NewUsecase(repoPemeriksaanVital)
 	handlerPemeriksaanVitalHTTP := handlerPemeriksaanVital.NewHandler(ucPemeriksaanVital)
 
+	// Wiring pemeriksaan_laboratorium
+	repoPemeriksaanLaboratorium := mysqlPemeriksaanLaboratorium.NewRepository(db)
+	ucPemeriksaanLaboratorium := usecasePemeriksaanLaboratorium.NewUsecase(repoPemeriksaanLaboratorium)
+	handlerPemeriksaanLaboratoriumHTTP := handlerPemeriksaanLaboratorium.NewHandler(ucPemeriksaanLaboratorium)
+
+	// Wiring pemeriksaan_ekg
+	repoPemeriksaanEkg := mysqlPemeriksaanEkg.NewRepository(db)
+	ucPemeriksaanEkg := usecasePemeriksaanEkg.NewUsecase(repoPemeriksaanEkg)
+	handlerPemeriksaanEkgHTTP := handlerPemeriksaanEkg.NewHandler(ucPemeriksaanEkg)
+
+	// Wiring ICD
+	repoICD := mysqlICD.NewRepository(db)
+	ucICD := usecaseICD.NewUsecase(repoICD)
+	handlerICDHTTP := handlerICD.NewHandler(ucICD)
+
 	// Wiring tatalaksana
 	repoTatalaksana := mysqlTatalaksana.NewRepository(db)
 	ucTatalaksana := usecaseTatalaksana.NewUsecase(repoTatalaksana)
 	handlerTatalaksanaHTTP := handlerTatalaksana.NewHandler(ucTatalaksana)
-
-	// Wiring rujuk_ulang
 	repoRujukUlang := mysqlRujukUlang.NewRepository(db)
 	ucRujukUlang := usecaseRujukUlang.NewUsecase(repoRujukUlang)
 	handlerRujukUlangHTTP := handlerRujukUlang.NewHandler(ucRujukUlang)
-
-	// Setup Gin router
 	r := gin.Default()
 	r.Use(cors.Default())
 	router.RegisterAnamnesisRoutes(r, handlerAnam)
@@ -121,10 +141,12 @@ func main() {
 	router.RegisterPoliRoutes(r, handlerPoliHTTP)
 	router.RegisterAntrianRoutes(r, handlerAntrianHTTP)
 	router.RegisterPemeriksaanVitalRoutes(r, handlerPemeriksaanVitalHTTP)
+	router.RegisterPemeriksaanLaboratoriumRoutes(r, handlerPemeriksaanLaboratoriumHTTP)
+	router.RegisterPemeriksaanEkgRoutes(r, handlerPemeriksaanEkgHTTP)
+	router.RegisterICDRoutes(r, handlerICDHTTP)
 	router.RegisterTatalaksanaRoutes(r, handlerTatalaksanaHTTP)
 	router.RegisterRujukUlangRoutes(r, handlerRujukUlangHTTP)
 
-	// Jalankan HTTP server
 	if err := r.Run(":8080"); err != nil {
 		log.Fatalf("failed to run server: %v", err)
 	}

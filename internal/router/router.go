@@ -5,7 +5,10 @@ import (
 	hantrian "rme/internal/handler/antrian"
 	hauth "rme/internal/handler/auth"
 	hdoctor "rme/internal/handler/doctor"
+	hicd "rme/internal/handler/icd"
 	hpatient "rme/internal/handler/patient"
+	hpe "rme/internal/handler/pemeriksaan_ekg"
+	hpl "rme/internal/handler/pemeriksaan_laboratorium"
 	hpv "rme/internal/handler/pemeriksaan_vital"
 	hpoli "rme/internal/handler/poli"
 	hru "rme/internal/handler/rujuk_ulang"
@@ -22,6 +25,8 @@ func RegisterAntrianRoutes(r *gin.Engine, handler *hantrian.Handler) {
 	group.POST("/", handler.Create)
 	group.GET("/", handler.GetAll)
 	group.PATCH("/:id", handler.Update)
+	group.PATCH("/patient/:id_pasien", handler.UpdateByPatient)
+	group.DELETE("/patient/:id_pasien", handler.DeleteByPatient)
 }
 
 // RegisterAnamnesisRoutes mendaftarkan endpoint /anamnesis ke Gin router.
@@ -91,6 +96,34 @@ func RegisterPemeriksaanVitalRoutes(r *gin.Engine, handler *hpv.Handler) {
 	group.PATCH("/:id/hide", handler.Hide)
 }
 
+// RegisterPemeriksaanLaboratoriumRoutes mendaftarkan endpoint /pemeriksaan_laboratorium
+func RegisterPemeriksaanLaboratoriumRoutes(r *gin.Engine, handler *hpl.Handler) {
+	group := r.Group("/pemeriksaan_laboratorium")
+	group.POST("/", handler.Create)
+	group.GET("/", handler.GetAll)
+	group.GET("/:id", handler.GetByID)
+	group.PATCH("/:id", handler.Update)
+	group.DELETE("/:id", handler.Delete)
+	group.PATCH("/:id/hide", handler.Hide)
+}
+
+// RegisterPemeriksaanEkgRoutes mendaftarkan endpoint /pemeriksaan_ekg
+func RegisterPemeriksaanEkgRoutes(r *gin.Engine, handler *hpe.Handler) {
+	group := r.Group("/pemeriksaan_ekg")
+	group.POST("/", handler.Create)
+	group.GET("/", handler.GetAll)
+	group.GET("/:id", handler.GetByID)
+	group.PATCH("/:id", handler.Update)
+	group.PATCH("/:id/hide", handler.Hide)
+	group.DELETE("/:id", handler.Delete)
+}
+
+// RegisterICDRoutes mendaftarkan endpoint /icd10
+func RegisterICDRoutes(r *gin.Engine, handler *hicd.Handler) {
+	group := r.Group("/icd10")
+	group.GET("/", handler.GetAll)
+}
+
 // RegisterTatalaksanaRoutes mendaftarkan endpoint /tatalaksana
 func RegisterTatalaksanaRoutes(r *gin.Engine, handler *hta.Handler) {
 	group := r.Group("/tatalaksana")
@@ -108,5 +141,6 @@ func RegisterRujukUlangRoutes(r *gin.Engine, handler *hru.Handler) {
 	group.GET("/", handler.GetAll)
 	group.GET("/:id", handler.GetByID)
 	group.PATCH("/:id", handler.Update)
+	group.DELETE("/:id", handler.Delete)
 	group.PATCH("/:id/hide", handler.Hide)
 }

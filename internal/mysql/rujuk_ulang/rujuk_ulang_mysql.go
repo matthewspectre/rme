@@ -149,3 +149,8 @@ func (r *RepositoryMySQL) Update(id int, updates map[string]interface{}) error {
 	}
 	return r.db.WithContext(ctx).Model(&model.RujukUlangModel{}).Where("id_rujuk_ulang = ?", id).Updates(updates).Error
 }
+
+func (r *RepositoryMySQL) Delete(id int) error {
+	ctx := context.Background()
+	return r.db.WithContext(ctx).Where("id_rujuk_ulang = ?", id).Delete(&model.RujukUlangModel{}).Error
+}

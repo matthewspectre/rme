@@ -8,6 +8,7 @@ type AntrianModel struct {
 	NomorAntrian int    `gorm:"column:nomor_antrian"`
 	IDPoli       int    `gorm:"column:id_poli"`
 	Waktu        string `gorm:"column:waktu"`
+	Status       int    `gorm:"column:status"`
 }
 
 func (AntrianModel) TableName() string {
