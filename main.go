@@ -16,6 +16,7 @@ import (
 	handlerDiagnosis "rme/internal/handler/diagnosis"
 	handlerDoctor "rme/internal/handler/doctor"
 	handlerICD "rme/internal/handler/icd"
+	handlerLokalisBedah "rme/internal/handler/lokalis_bedah"
 	handlerPatient "rme/internal/handler/patient"
 	handlerPemeriksaanEkg "rme/internal/handler/pemeriksaan_ekg"
 	handlerPemeriksaanLaboratorium "rme/internal/handler/pemeriksaan_laboratorium"
@@ -29,6 +30,7 @@ import (
 	mysqlDiagnosis "rme/internal/mysql/diagnosis"
 	mysqlDoctor "rme/internal/mysql/doctor"
 	mysqlICD "rme/internal/mysql/icd"
+	mysqlLokalisBedah "rme/internal/mysql/lokalis_bedah"
 	mysqlPatient "rme/internal/mysql/patient"
 	mysqlPemeriksaanEkg "rme/internal/mysql/pemeriksaan_ekg"
 	mysqlPemeriksaanLaboratorium "rme/internal/mysql/pemeriksaan_laboratorium"
@@ -47,6 +49,7 @@ import (
 	usecaseDiagnosis "rme/internal/usecase/diagnosis"
 	usecaseDoctor "rme/internal/usecase/doctor"
 	usecaseICD "rme/internal/usecase/icd"
+	usecaseLokalisBedah "rme/internal/usecase/lokalis_bedah"
 	usecasePatient "rme/internal/usecase/patient"
 	usecasePemeriksaanEkg "rme/internal/usecase/pemeriksaan_ekg"
 	usecasePemeriksaanLaboratorium "rme/internal/usecase/pemeriksaan_laboratorium"
@@ -133,6 +136,11 @@ func main() {
 	ucTatalaksana := usecaseTatalaksana.NewUsecase(repoTatalaksana)
 	handlerTatalaksanaHTTP := handlerTatalaksana.NewHandler(ucTatalaksana)
 
+	// Wiring status lokalis bedah
+	repoLokalisBedah := mysqlLokalisBedah.NewRepository(db)
+	ucLokalisBedah := usecaseLokalisBedah.NewUsecase(repoLokalisBedah)
+	handlerLokalisBedahHTTP := handlerLokalisBedah.NewHandler(ucLokalisBedah)
+
 	// Wiring diagnosis
 	repoDiagnosis := mysqlDiagnosis.NewMySQLRepo(db)
 	ucDiagnosis := usecaseDiagnosis.NewUsecase(repoDiagnosis)
@@ -155,6 +163,7 @@ func main() {
 	router.RegisterTatalaksanaRoutes(r, handlerTatalaksanaHTTP)
 	router.RegisterRujukUlangRoutes(r, handlerRujukUlangHTTP)
 	router.RegisterDiagnosisRoutes(r, handlerDiagnosisHTTP)
+	router.RegisterLokalisBedahRoutes(r, handlerLokalisBedahHTTP)
 
 	if err := r.Run(":8080"); err != nil {
 		log.Fatalf("failed to run server: %v", err)

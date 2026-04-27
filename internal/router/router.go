@@ -7,6 +7,7 @@ import (
 	hdiag "rme/internal/handler/diagnosis"
 	hdoctor "rme/internal/handler/doctor"
 	hicd "rme/internal/handler/icd"
+	hlok "rme/internal/handler/lokalis_bedah"
 	hpatient "rme/internal/handler/patient"
 	hpe "rme/internal/handler/pemeriksaan_ekg"
 	hpl "rme/internal/handler/pemeriksaan_laboratorium"
@@ -132,6 +133,16 @@ func RegisterTatalaksanaRoutes(r *gin.Engine, handler *hta.Handler) {
 	group.GET("/", handler.GetAll)
 	group.GET("/:id", handler.GetByID)
 	group.PATCH("/:id", handler.Update)
+	group.PATCH("/:id/hide", handler.Hide)
+}
+
+// RegisterLokalisBedahRoutes mendaftarkan endpoint /lokalis_bedah
+func RegisterLokalisBedahRoutes(r *gin.Engine, handler *hlok.Handler) {
+	group := r.Group("/lokalis_bedah")
+	group.POST("/", handler.Create)
+	group.GET("/:id", handler.GetByID)
+	group.GET("/", handler.GetAll)
+	group.PATCH(":id", handler.Update)
 	group.PATCH("/:id/hide", handler.Hide)
 }
 
