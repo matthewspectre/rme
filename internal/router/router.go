@@ -4,6 +4,7 @@ import (
 	hanamnesis "rme/internal/handler/anamnesis"
 	hantrian "rme/internal/handler/antrian"
 	hauth "rme/internal/handler/auth"
+	hdiag "rme/internal/handler/diagnosis"
 	hdoctor "rme/internal/handler/doctor"
 	hicd "rme/internal/handler/icd"
 	hpatient "rme/internal/handler/patient"
@@ -131,6 +132,17 @@ func RegisterTatalaksanaRoutes(r *gin.Engine, handler *hta.Handler) {
 	group.GET("/", handler.GetAll)
 	group.GET("/:id", handler.GetByID)
 	group.PATCH("/:id", handler.Update)
+	group.PATCH("/:id/hide", handler.Hide)
+}
+
+// RegisterDiagnosisRoutes mendaftarkan endpoint /diagnosis
+func RegisterDiagnosisRoutes(r *gin.Engine, handler *hdiag.Handler) {
+	group := r.Group("/diagnosis")
+	group.POST("/", handler.Create)
+	group.GET("/:id", handler.GetByID)
+	group.GET("/", handler.GetAll)
+	group.PATCH(":id", handler.Update)
+	// Soft-hide endpoint
 	group.PATCH("/:id/hide", handler.Hide)
 }
 

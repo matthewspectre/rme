@@ -13,6 +13,7 @@ import (
 	handlerAnamnesis "rme/internal/handler/anamnesis"
 	handlerAntrian "rme/internal/handler/antrian"
 	handlerAuth "rme/internal/handler/auth"
+	handlerDiagnosis "rme/internal/handler/diagnosis"
 	handlerDoctor "rme/internal/handler/doctor"
 	handlerICD "rme/internal/handler/icd"
 	handlerPatient "rme/internal/handler/patient"
@@ -25,6 +26,7 @@ import (
 
 	mysqlAnamnesis "rme/internal/mysql/anamnesis"
 	mysqlAntrian "rme/internal/mysql/antrian"
+	mysqlDiagnosis "rme/internal/mysql/diagnosis"
 	mysqlDoctor "rme/internal/mysql/doctor"
 	mysqlICD "rme/internal/mysql/icd"
 	mysqlPatient "rme/internal/mysql/patient"
@@ -42,6 +44,7 @@ import (
 	usecaseAnamnesis "rme/internal/usecase/anamnesis"
 	usecaseAntrian "rme/internal/usecase/antrian"
 	usecaseAuth "rme/internal/usecase/auth"
+	usecaseDiagnosis "rme/internal/usecase/diagnosis"
 	usecaseDoctor "rme/internal/usecase/doctor"
 	usecaseICD "rme/internal/usecase/icd"
 	usecasePatient "rme/internal/usecase/patient"
@@ -129,6 +132,11 @@ func main() {
 	repoTatalaksana := mysqlTatalaksana.NewRepository(db)
 	ucTatalaksana := usecaseTatalaksana.NewUsecase(repoTatalaksana)
 	handlerTatalaksanaHTTP := handlerTatalaksana.NewHandler(ucTatalaksana)
+
+	// Wiring diagnosis
+	repoDiagnosis := mysqlDiagnosis.NewMySQLRepo(db)
+	ucDiagnosis := usecaseDiagnosis.NewUsecase(repoDiagnosis)
+	handlerDiagnosisHTTP := handlerDiagnosis.NewHandler(ucDiagnosis)
 	repoRujukUlang := mysqlRujukUlang.NewRepository(db)
 	ucRujukUlang := usecaseRujukUlang.NewUsecase(repoRujukUlang)
 	handlerRujukUlangHTTP := handlerRujukUlang.NewHandler(ucRujukUlang)
@@ -146,6 +154,7 @@ func main() {
 	router.RegisterICDRoutes(r, handlerICDHTTP)
 	router.RegisterTatalaksanaRoutes(r, handlerTatalaksanaHTTP)
 	router.RegisterRujukUlangRoutes(r, handlerRujukUlangHTTP)
+	router.RegisterDiagnosisRoutes(r, handlerDiagnosisHTTP)
 
 	if err := r.Run(":8080"); err != nil {
 		log.Fatalf("failed to run server: %v", err)
