@@ -19,6 +19,7 @@ import (
 	handlerLokalisBedah "rme/internal/handler/lokalis_bedah"
 	handlerPatient "rme/internal/handler/patient"
 	handlerPemeriksaanEkg "rme/internal/handler/pemeriksaan_ekg"
+	handlerPemeriksaanFungsiOrgan "rme/internal/handler/pemeriksaan_fungsi_organ"
 	handlerPemeriksaanLaboratorium "rme/internal/handler/pemeriksaan_laboratorium"
 	handlerPemeriksaanVital "rme/internal/handler/pemeriksaan_vital"
 	handlerPoli "rme/internal/handler/poli"
@@ -33,6 +34,7 @@ import (
 	mysqlLokalisBedah "rme/internal/mysql/lokalis_bedah"
 	mysqlPatient "rme/internal/mysql/patient"
 	mysqlPemeriksaanEkg "rme/internal/mysql/pemeriksaan_ekg"
+	mysqlPemeriksaanFungsiOrgan "rme/internal/mysql/pemeriksaan_fungsi_organ"
 	mysqlPemeriksaanLaboratorium "rme/internal/mysql/pemeriksaan_laboratorium"
 	mysqlPemeriksaanVital "rme/internal/mysql/pemeriksaan_vital"
 	mysqlPoli "rme/internal/mysql/poli"
@@ -52,6 +54,7 @@ import (
 	usecaseLokalisBedah "rme/internal/usecase/lokalis_bedah"
 	usecasePatient "rme/internal/usecase/patient"
 	usecasePemeriksaanEkg "rme/internal/usecase/pemeriksaan_ekg"
+	usecasePemeriksaanFungsiOrgan "rme/internal/usecase/pemeriksaan_fungsi_organ"
 	usecasePemeriksaanLaboratorium "rme/internal/usecase/pemeriksaan_laboratorium"
 	usecasePemeriksaanVital "rme/internal/usecase/pemeriksaan_vital"
 	usecasePoli "rme/internal/usecase/poli"
@@ -141,6 +144,11 @@ func main() {
 	ucLokalisBedah := usecaseLokalisBedah.NewUsecase(repoLokalisBedah)
 	handlerLokalisBedahHTTP := handlerLokalisBedah.NewHandler(ucLokalisBedah)
 
+	// Wiring pemeriksaan fungsi organ
+	repoPemeriksaanFungsiOrgan := mysqlPemeriksaanFungsiOrgan.NewRepository(db)
+	ucPemeriksaanFungsiOrgan := usecasePemeriksaanFungsiOrgan.NewUsecase(repoPemeriksaanFungsiOrgan)
+	handlerPemeriksaanFungsiOrganHTTP := handlerPemeriksaanFungsiOrgan.NewHandler(ucPemeriksaanFungsiOrgan)
+
 	// Wiring diagnosis
 	repoDiagnosis := mysqlDiagnosis.NewMySQLRepo(db)
 	ucDiagnosis := usecaseDiagnosis.NewUsecase(repoDiagnosis)
@@ -164,6 +172,7 @@ func main() {
 	router.RegisterRujukUlangRoutes(r, handlerRujukUlangHTTP)
 	router.RegisterDiagnosisRoutes(r, handlerDiagnosisHTTP)
 	router.RegisterLokalisBedahRoutes(r, handlerLokalisBedahHTTP)
+	router.RegisterPemeriksaanFungsiOrganRoutes(r, handlerPemeriksaanFungsiOrganHTTP)
 
 	if err := r.Run(":8080"); err != nil {
 		log.Fatalf("failed to run server: %v", err)

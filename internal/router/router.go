@@ -10,6 +10,7 @@ import (
 	hlok "rme/internal/handler/lokalis_bedah"
 	hpatient "rme/internal/handler/patient"
 	hpe "rme/internal/handler/pemeriksaan_ekg"
+	hpfo "rme/internal/handler/pemeriksaan_fungsi_organ"
 	hpl "rme/internal/handler/pemeriksaan_laboratorium"
 	hpv "rme/internal/handler/pemeriksaan_vital"
 	hpoli "rme/internal/handler/poli"
@@ -154,6 +155,16 @@ func RegisterDiagnosisRoutes(r *gin.Engine, handler *hdiag.Handler) {
 	group.GET("/", handler.GetAll)
 	group.PATCH(":id", handler.Update)
 	// Soft-hide endpoint
+	group.PATCH("/:id/hide", handler.Hide)
+}
+
+// RegisterPemeriksaanFungsiOrganRoutes mendaftarkan endpoint /pemeriksaan_fungsi_organ
+func RegisterPemeriksaanFungsiOrganRoutes(r *gin.Engine, handler *hpfo.Handler) {
+	group := r.Group("/pemeriksaan_fungsi_organ")
+	group.POST("/", handler.Create)
+	group.GET("/:id", handler.GetByID)
+	group.GET("/", handler.GetAll)
+	group.PATCH("/:id", handler.Update)
 	group.PATCH("/:id/hide", handler.Hide)
 }
 
