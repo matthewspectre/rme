@@ -12,6 +12,7 @@ import (
 	hpe "rme/internal/handler/pemeriksaan_ekg"
 	hpfo "rme/internal/handler/pemeriksaan_fungsi_organ"
 	hpl "rme/internal/handler/pemeriksaan_laboratorium"
+	hppb "rme/internal/handler/pemeriksaan_penunjang_bedah"
 	hpv "rme/internal/handler/pemeriksaan_vital"
 	hpoli "rme/internal/handler/poli"
 	hru "rme/internal/handler/rujuk_ulang"
@@ -166,6 +167,17 @@ func RegisterPemeriksaanFungsiOrganRoutes(r *gin.Engine, handler *hpfo.Handler) 
 	group.GET("/", handler.GetAll)
 	group.PATCH("/:id", handler.Update)
 	group.PATCH("/:id/hide", handler.Hide)
+}
+
+// RegisterPemeriksaanPenunjangBedahRoutes mendaftarkan endpoint /pemeriksaan_penunjang_bedah
+func RegisterPemeriksaanPenunjangBedahRoutes(r *gin.Engine, handler *hppb.Handler) {
+	group := r.Group("/pemeriksaan_penunjang_bedah")
+	group.POST("/", handler.Create)
+	group.GET("/:id", handler.GetByID)
+	group.GET("/", handler.GetAll)
+	group.PATCH("/:id", handler.Update)
+	group.PATCH("/:id/hide", handler.Hide)
+	group.PATCH("/patient/:id_pasien/hide", handler.HideByPatient)
 }
 
 // RegisterRujukUlangRoutes mendaftarkan endpoint /rujuk_ulang

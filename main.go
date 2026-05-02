@@ -21,6 +21,7 @@ import (
 	handlerPemeriksaanEkg "rme/internal/handler/pemeriksaan_ekg"
 	handlerPemeriksaanFungsiOrgan "rme/internal/handler/pemeriksaan_fungsi_organ"
 	handlerPemeriksaanLaboratorium "rme/internal/handler/pemeriksaan_laboratorium"
+	handlerPemeriksaanPenunjangBedah "rme/internal/handler/pemeriksaan_penunjang_bedah"
 	handlerPemeriksaanVital "rme/internal/handler/pemeriksaan_vital"
 	handlerPoli "rme/internal/handler/poli"
 	handlerRujukUlang "rme/internal/handler/rujuk_ulang"
@@ -36,6 +37,7 @@ import (
 	mysqlPemeriksaanEkg "rme/internal/mysql/pemeriksaan_ekg"
 	mysqlPemeriksaanFungsiOrgan "rme/internal/mysql/pemeriksaan_fungsi_organ"
 	mysqlPemeriksaanLaboratorium "rme/internal/mysql/pemeriksaan_laboratorium"
+	mysqlPemeriksaanPenunjangBedah "rme/internal/mysql/pemeriksaan_penunjang_bedah"
 	mysqlPemeriksaanVital "rme/internal/mysql/pemeriksaan_vital"
 	mysqlPoli "rme/internal/mysql/poli"
 	mysqlRujukUlang "rme/internal/mysql/rujuk_ulang"
@@ -56,6 +58,7 @@ import (
 	usecasePemeriksaanEkg "rme/internal/usecase/pemeriksaan_ekg"
 	usecasePemeriksaanFungsiOrgan "rme/internal/usecase/pemeriksaan_fungsi_organ"
 	usecasePemeriksaanLaboratorium "rme/internal/usecase/pemeriksaan_laboratorium"
+	usecasePemeriksaanPenunjangBedah "rme/internal/usecase/pemeriksaan_penunjang_bedah"
 	usecasePemeriksaanVital "rme/internal/usecase/pemeriksaan_vital"
 	usecasePoli "rme/internal/usecase/poli"
 	usecaseRujukUlang "rme/internal/usecase/rujuk_ulang"
@@ -149,6 +152,11 @@ func main() {
 	ucPemeriksaanFungsiOrgan := usecasePemeriksaanFungsiOrgan.NewUsecase(repoPemeriksaanFungsiOrgan)
 	handlerPemeriksaanFungsiOrganHTTP := handlerPemeriksaanFungsiOrgan.NewHandler(ucPemeriksaanFungsiOrgan)
 
+	// Wiring pemeriksaan penunjang bedah (new)
+	repoPemeriksaanPenunjangBedah := mysqlPemeriksaanPenunjangBedah.NewRepository(db)
+	ucPemeriksaanPenunjangBedah := usecasePemeriksaanPenunjangBedah.NewUsecase(repoPemeriksaanPenunjangBedah)
+	handlerPemeriksaanPenunjangBedahHTTP := handlerPemeriksaanPenunjangBedah.NewHandler(ucPemeriksaanPenunjangBedah)
+
 	// Wiring diagnosis
 	repoDiagnosis := mysqlDiagnosis.NewMySQLRepo(db)
 	ucDiagnosis := usecaseDiagnosis.NewUsecase(repoDiagnosis)
@@ -173,6 +181,7 @@ func main() {
 	router.RegisterDiagnosisRoutes(r, handlerDiagnosisHTTP)
 	router.RegisterLokalisBedahRoutes(r, handlerLokalisBedahHTTP)
 	router.RegisterPemeriksaanFungsiOrganRoutes(r, handlerPemeriksaanFungsiOrganHTTP)
+	router.RegisterPemeriksaanPenunjangBedahRoutes(r, handlerPemeriksaanPenunjangBedahHTTP)
 
 	if err := r.Run(":8080"); err != nil {
 		log.Fatalf("failed to run server: %v", err)
